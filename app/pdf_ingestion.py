@@ -1,10 +1,7 @@
 from pypdf import PdfReader
 from pathlib import Path
-from dotenv import load_dotenv
-
-# Define base directories
-BASE_DIR = Path(__file__).resolve().parent.parent
-DATA_DIR = BASE_DIR / "data"
+from config import BASE_DIR
+from config import DATA_DIR
 
 def extract_text_from_pdf(file_path):
     """
@@ -42,7 +39,7 @@ if __name__ == "__main__":
         else:
             print(f"Found {len(pdf_files)} PDF file(s) in {DATA_DIR}")
             for pdf_file in pdf_files:
-                
+
                 print(f"\nProcessing PDF: {pdf_file}")
                 raw_text = extract_text_from_pdf(pdf_file)
                 clean_text = preprocess_text(raw_text)
