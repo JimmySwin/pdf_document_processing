@@ -11,12 +11,12 @@ Usage Examples:
 import argparse
 import sys
 from pathlib import Path
-from pdf_ingestion import extract_text_from_pdf, preprocess_text
-from extractor import extract_metadata_multi_call, extract_metadata_single_call
-from db import init_db, save_result, generate_request_id
-from email_drafter import generate_email_draft
-from logger import logger
-from config import DATA_DIR, DB_PATH
+from .pdf_ingestion import extract_text_from_pdf, preprocess_text
+from .extractor import extract_metadata_multi_call, extract_metadata_single_call
+from .db import init_db, save_result, generate_request_id
+from .email_drafter import generate_email_draft
+from .logger import logger
+from .config import DATA_DIR, DB_PATH
 
 def process_pdfs(input_dir, extraction_method: str = "multi_call"):
     """

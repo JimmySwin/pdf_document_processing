@@ -2,10 +2,10 @@ import re
 import time
 import json
 from openai import OpenAI
-from pdf_ingestion import extract_text_from_pdf, preprocess_text
+from .pdf_ingestion import extract_text_from_pdf, preprocess_text
 from dotenv import load_dotenv
 import os
-from config import DATA_DIR
+from .config import DATA_DIR
 
 load_dotenv()
 openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
