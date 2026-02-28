@@ -40,10 +40,12 @@ def extract_document_type(text : str) -> dict:
     prompt = f"""You are an expert legal document analyst working for Lloyd's of London.
 
 Classify the document type. You MUST choose exactly one of these four values:
-  - "notice"
-  - "lawsuit"
-  - "legal correspondence"
-  - "other"
+  - "notice"              – regulatory notices, warnings, formal notifications
+  - "lawsuit"             – claims, judgments, court decisions, legal actions
+  - "legal correspondence" – letters, orders, and correspondence from legal parties or courts
+  - "other"               – documents that don't fit the above categories
+
+Court orders, scheduling orders, and correspondence from courts or legal representatives are "legal correspondence".
 
 Return a JSON object with:
   "value"       – exactly one of the four values above (lowercase)
@@ -131,6 +133,9 @@ Document text:
     )
     return json.loads(response.choices[0].message.content.strip())
 
+
+
+
 def rejected(doc_type_result : dict, elapsed : float) -> dict:
     """Builds the early-exit return value when a document type is 'other'."""
     reason = doc_type_result.get("reason") or doc_type_result.get("explanation", "No reason provided.") #Return reason unless its other so dosnt exist retunr explination
@@ -139,6 +144,9 @@ def rejected(doc_type_result : dict, elapsed : float) -> dict:
         "message": f"This document isn't a notice, lawsuit or legal correspondence. Reason: {reason}",
         "elapsed_seconds": round(elapsed, 3),
     }
+
+
+
 
 def extract_metadata_multi_call(text : str) -> dict:
     """
@@ -168,12 +176,21 @@ def extract_metadata_multi_call(text : str) -> dict:
     elapsed = time.perf_counter() - start
     return {"metadata": metadata, "elapsed_seconds": round(elapsed, 3)}
 
+
+
+
 def extract_metadata_single_call(text : str) -> dict:
     """
-    All fields in a single API call. This is simpler and more cost effective, but may be less accurate as the prompt is more complex and there's no regex guidance for the LLM.
+    All fields in a single API call, but with regex guidance for certain fields.
+    This is more cost effective than multi_call and faster, while still providing
+    good accuracy through regex pre-extraction.
     """
     model = os.getenv("LLM_MODEL", "gpt-4o")
     start = time.perf_counter()
+
+    policy_numbers = extract_policy_numbers(text)
+    case_reference_numbers = extract_case_reference_numbers(text)
+    all_dates = extract_all_dates(text)
 
     prompt = f"""You are an expert at extracting structured information from legal documents sent to Lloyd's of London.
 
@@ -187,6 +204,19 @@ For "Document Type" specifically:
   - "value" MUST be exactly one of: "notice", "lawsuit", "legal correspondence", "other"
   - If "other", also include "reason": a short explanation or direct quote from the document
     explaining why it is not a notice, lawsuit, or legal correspondence
+
+For fields with regex pre-extraction (see below), you MUST also include:
+  - "changed": true if you changed/refined the regex value, false if you kept it as-is
+
+Fields with regex pre-extraction:
+  - Policy Numbers (regex value: {", ".join(policy_numbers)})
+  - Case Reference Numbers (regex value: {", ".join(case_reference_numbers)})
+  - Date Of Loss (regex value: {", ".join(all_dates)})
+
+Other fields (no regex pre-extraction):
+  - Recipient
+  - Claimant
+  - Defendant
 
 Fields to extract:
   - Document Type
@@ -209,12 +239,12 @@ Document text:
             {"role": "system", "content": "You are an expert legal document analyst. Always respond with valid JSON."},
             {"role": "user", "content": prompt},
         ],
-        max_tokens=900, #Increased the max token output as we are doing all fields at once.
+        max_tokens=900,
         temperature=0.1,
         response_format={"type": "json_object"},
     )
 
-    elapsed = time.perf_counter() - start #To track the time taken for the API call and processing
+    elapsed = time.perf_counter() - start
     metadata = json.loads(response.choices[0].message.content.strip())
 
     # Normalise document type value
