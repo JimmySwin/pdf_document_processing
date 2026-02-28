@@ -40,12 +40,18 @@ def extract_document_type(text : str) -> dict:
     prompt = f"""You are an expert legal document analyst working for Lloyd's of London.
 
 Classify the document type. You MUST choose exactly one of these four values:
-  - "notice"              – regulatory notices, warnings, formal notifications
-  - "lawsuit"             – claims, judgments, court decisions, legal actions
-  - "legal correspondence" – letters, orders, and correspondence from legal parties or courts
-  - "other"               – documents that don't fit the above categories
+  - "notice"              – regulatory notices, warnings, formal notifications, coverage updates
+  - "lawsuit"             – claims, judgments, court decisions, legal actions, court orders, scheduling orders
+  - "legal correspondence" – letters, orders, and correspondence from legal parties, courts, or insurers
+  - "other"               – documents that don't fit the above categories (e.g., brochures, marketing materials)
 
-Court orders, scheduling orders, and correspondence from courts or legal representatives are "legal correspondence".
+IMPORTANT: Be inclusive rather than exclusive. If a document relates to insurance, legal matters, or official business, classify it as one of the three main categories.
+
+Examples:
+  - Coverage position letter → "legal correspondence"
+  - Court scheduling order → "lawsuit"
+  - Insurance claim update → "notice"
+  - Event brochure with no insurance/legal content → "other"
 
 Return a JSON object with:
   "value"       – exactly one of the four values above (lowercase)
@@ -259,7 +265,7 @@ Document text:
     return {"metadata": metadata, "elapsed_seconds": round(elapsed, 3)}
 
 if __name__ == "__main__":
-    SAMPLE_PDF = DATA_DIR / "2 - Settlement Offer – Harper v CityTaxi Ltd.pdf"
+    SAMPLE_PDF = DATA_DIR / "4 - First Notice of Loss – Water Escape at Sunbeam Apartments.pdf"
 
     if not SAMPLE_PDF.exists():
         print(f"Sample PDF not found at {SAMPLE_PDF}")
