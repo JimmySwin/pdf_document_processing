@@ -15,13 +15,13 @@ def generate_email_draft(metadata: dict, request_id: str, filename: str) -> str:
         return fallback if field_metadata == "Not Found" else field_metadata
     
     # get the metadata values 
-    recipient_value = get_metadata(metadata.get("Recipient", {}), "Relevant Party")
-    doc_type_value = get_metadata(metadata.get("Document Type", {}))
-    policy_value = get_metadata(metadata.get("Policy Numbers", {}))
-    date_value = get_metadata(metadata.get("Date Of Loss", {}))
-    claimant_value = get_metadata(metadata.get("Claimant", {}))
-    defendant_value = get_metadata(metadata.get("Defendant", {}))
-    case_ref_value = get_metadata(metadata.get("Case Reference Numbers", {}))
+    recipient_name = get_metadata(metadata.get("Recipient", {}), "Relevant Party")
+    doc_type = get_metadata(metadata.get("Document Type", {}))
+    policy_number = get_metadata(metadata.get("Policy Numbers", {}))
+    date_of_loss = get_metadata(metadata.get("Date Of Loss", {}))
+    claimant_name = get_metadata(metadata.get("Claimant", {}))
+    defendant_name = get_metadata(metadata.get("Defendant", {}))
+    case_ref_number = get_metadata(metadata.get("Case Reference Numbers", {}))
     
     subject_map = { #Subject is decided based on document type
         "notice": "Regulatory Notice Received",
@@ -29,32 +29,32 @@ def generate_email_draft(metadata: dict, request_id: str, filename: str) -> str:
         "legal correspondence": "Legal Correspondence Received",
         "other": "Document Processing Notification"
     }
-    subject = subject_map.get(doc_type_value, "Document Processing Notification")
+    subject = subject_map.get(doc_type, "Document Processing Notification")
     
     # Build the email draft
-    email_draft = f"""To: {recipient_value}
-Subject: {subject}
+    email_draft = f"""To: {recipient_name}
+Subject: {subject} - {policy_number}
 
-Dear {recipient_value},
+Dear {recipient_name},
 
 Please find below a summary of the document processed through our AI-assisted document processing system.
 
 DOCUMENT INFORMATION
 ────────────────────
-Document Type:          {doc_type_value}
+Document Type:          {doc_type}
 Source File:            {filename}
 Processing Request ID:  {request_id}
 
 IMPORTANT DETAILS
 ────────────────────
-Policy Number:          {policy_value}
-Date of Loss:           {date_value}
-Case Reference:         {case_ref_value}
+Policy Number:          {policy_number}
+Date of Loss:           {date_of_loss}
+Case Reference:         {case_ref_number}
 
 PARTIES INVOLVED
 ────────────────────
-Claimant:               {claimant_value}
-Defendant:              {defendant_value}
+Claimant:               {claimant_name}
+Defendant:              {defendant_name}
 
 ACTION REQUIRED
 ────────────────────
