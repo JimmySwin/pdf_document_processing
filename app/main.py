@@ -14,6 +14,7 @@ from pathlib import Path
 from pdf_ingestion import extract_text_from_pdf, preprocess_text
 from extractor import extract_metadata_multi_call, extract_metadata_single_call
 from db import init_db, save_result, generate_request_id
+from email_drafter import generate_email_draft
 from config import DATA_DIR, DB_PATH
 
 def process_pdfs(input_dir, extraction_method: str = "multi_call"):
@@ -62,6 +63,9 @@ def process_pdfs(input_dir, extraction_method: str = "multi_call"):
             else:
                 metadata = result.get("metadata", {})
                 print(f"Extracted {len(metadata)} fields")
+                email_draft = generate_email_draft(metadata, request_id, pdf_file.name)
+                print("\nGenerated Email Draft:\n")
+                print(email_draft)
             
             print()
         
