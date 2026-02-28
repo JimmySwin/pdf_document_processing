@@ -15,7 +15,7 @@ def extract_text_from_pdf(file_path):
             pdf_text += page_text + "\n"
     return pdf_text.strip()
 
-def preprocess_text(text):
+def preprocess_text(text : str) -> str:
     """
     Cleans and normalises the extracted text (removes any extra whitespaces).
     """
