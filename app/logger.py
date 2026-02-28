@@ -6,7 +6,7 @@ Logs are saved to files for audit and displayed on console.
 import logging
 from datetime import datetime
 from pathlib import Path
-from .config import BASE_DIR
+from config import BASE_DIR
 
 # Create logs directory if it doesn't exist
 LOG_DIR = BASE_DIR / "logs"

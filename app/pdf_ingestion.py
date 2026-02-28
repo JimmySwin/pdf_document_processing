@@ -1,6 +1,6 @@
 from pypdf import PdfReader
 from pathlib import Path
-from .config import DATA_DIR
+from config import DATA_DIR
 
 def extract_text_from_pdf(file_path):
     """
