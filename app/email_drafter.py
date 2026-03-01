@@ -12,9 +12,9 @@ def generate_email_draft(metadata: dict, request_id: str, filename: str) -> str:
         """Extract the 'metadata' from a field dict, or return fallback if 'Not Found'
         Gives all fields a value to avoid issues in the email template, and makes it clear when something was not extracted."""
         field_metadata = field.get("value", fallback)
-        return fallback if field_metadata == "Not Found" else field_metadata
+        return field_metadata
     
-    # get the metadata values 
+    # Sets all of the metadata vairables
     recipient_name = get_metadata(metadata.get("Recipient", {}), "Relevant Party")
     doc_type = get_metadata(metadata.get("Document Type", {}))
     policy_number = get_metadata(metadata.get("Policy Numbers", {}))
@@ -71,4 +71,4 @@ This is an automated draft generated for your review. Please customise as needed
 Request ID: {request_id}
 """
     
-    return email_draft.strip()
+    return email_draft

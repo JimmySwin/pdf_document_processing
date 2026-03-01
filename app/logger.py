@@ -16,7 +16,7 @@ LOG_DIR.mkdir(exist_ok=True)
 log_filename = f"processing_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
 log_filepath = LOG_DIR / log_filename
 
-# File handler - saves EVERYTHING to file (for audit trail)
+# File handler - saves everything to file (for audit trail)
 file_handler = logging.FileHandler(log_filepath)
 file_handler.setLevel(logging.INFO)  # Save INFO and above
 
@@ -25,7 +25,7 @@ console_handler = logging.StreamHandler()
 console_handler.setLevel(logging.INFO)  # Info prints everything, Warning prints only warnings and errors, Error prints only errors
 
 #makes logs human-readable
-formatter = logging.Formatter(
+formatter = logging.Formatter( #Pre made log format with timestamp, log level and message
     '%(asctime)s | %(levelname)-8s | %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S'
 )

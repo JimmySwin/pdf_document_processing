@@ -22,7 +22,7 @@ def process_pdfs(input_dir, extraction_method: str = "multi_call"):
     """
     Process all PDFs in a directory and save results to the database.
     """
-    init_db(DB_PATH)
+    init_db(DB_PATH) # Initialises the database.
     print(f"Database initialized at: {DB_PATH}")
     pdf_files = list(input_dir.glob("*.pdf"))
     
@@ -31,7 +31,7 @@ def process_pdfs(input_dir, extraction_method: str = "multi_call"):
         return
     print(f"Found {len(pdf_files)} PDF file(s)\n")
     
-    if extraction_method == "single_call":
+    if extraction_method == "single_call": #Defult to multi call unless stated otherwise
         extract_func = extract_metadata_single_call
     else:
         extract_func = extract_metadata_multi_call
@@ -64,7 +64,7 @@ def process_pdfs(input_dir, extraction_method: str = "multi_call"):
                 result=result
             )
             
-            # Update metrics
+            # Update running count metrics
             total_documents += 1
             elapsed = result.get('elapsed_seconds', 0)
             total_time += elapsed
@@ -87,11 +87,11 @@ def process_pdfs(input_dir, extraction_method: str = "multi_call"):
             logger.info(f"Time taken: {elapsed}s")
             
             print()
-            print()
+            print() #Extra padding spaces to make it easier to read the logs
             print()
             print()
         
-        except Exception as e:
+        except Exception as e: #Error handeling
             total_documents += 1
             rejected_documents += 1
             logger.error(f"Error processing {pdf_file.name}: {e}")
@@ -110,7 +110,7 @@ def process_pdfs(input_dir, extraction_method: str = "multi_call"):
     print("="*70 + "\n")
 
 def main():
-    parser = argparse.ArgumentParser(
+    parser = argparse.ArgumentParser( 
         description="Process PDFs and extract metadata using AI"
     )
     parser.add_argument(

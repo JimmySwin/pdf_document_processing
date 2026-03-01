@@ -32,10 +32,10 @@ def extract_document_type(text : str) -> dict:
     Classifies the document as one of: notice, lawsuit, legal correspondence, other.
     Returns a dict:
       - "value": Document label
-      - "explanation": Quote of why the LLM chose that label
-      - "reason": Used when other is picked to say why.
+      - "explanation": Quote of why the LLM chose that label for cross checking
+      - "reason": If other is picked, then why does the LLM not think its a valid document
     """
-    model = os.getenv("LLM_MODEL", "gpt-4o")
+    model = os.getenv("LLM_MODEL", "gpt-4o") #Use the model set in the environment variable, default to gpt-4o if not set
 
     prompt = f"""You are an expert legal document analyst working for Lloyd's of London.
 
@@ -69,24 +69,23 @@ Document text:
 
     response = openai_client.chat.completions.create(
         model=model,
-        messages=[
+        messages=[ #System prompt to set the role and instructions, and user prompt with the document text and task details
             {"role": "system", "content": "You are an expert legal document analyst. Always respond with valid JSON."},
             {"role": "user", "content": prompt},
         ],
-        max_tokens=300,
+        max_tokens=300, # Max replying token usage
         temperature=0, # low temperature for more deterministic output
         response_format={"type": "json_object"},
     )
-    result = json.loads(response.choices[0].message.content.strip()) # Returns the first index as the API returns a list
+    doc_type = json.loads(response.choices[0].message.content.strip()) # Returns the first index as the API returns a list
 
-    # Normalise value to lowercase changes and validate against allowed document types
-    result["value"] = result.get("value", "other").lower()
-    if result["value"] not in VALID_DOCUMENT_TYPES:
-        result["value"] = "other"
+    doc_type["value"] = doc_type.get("value", "other").lower()
+    if doc_type["value"] not in VALID_DOCUMENT_TYPES: #Normalises the document type and picks other if one isnt selected
+        doc_type["value"] = "other"
 
-    return result
+    return doc_type
 
-def extract_with_llm(text, field, existing_data=None):
+def extract_with_llm(text : str, field, existing_data=None) -> dict:
     """
     Extract or validate a single field via LLM.
 
@@ -113,7 +112,7 @@ def extract_with_llm(text, field, existing_data=None):
             '  "value"       – the extracted value, or "Not Found" if absent\n'
             '  "explanation" – the exact sentence or short phrase from the text that led you to this value'
         )
-        existing_line = ''
+        existing_line = '' # No existing data, so no need to include that in the prompt
 
     prompt = f"""You are an expert at extracting structured information from legal documents sent to Lloyd's of London.
 
@@ -129,7 +128,7 @@ Document text:
 
     response = openai_client.chat.completions.create(
         model=model,
-        messages=[
+        messages=[ # System prompt to set the role and instructions, and user prompt with the document text and task details
             {"role": "system", "content": "You are an expert legal document analyst. Always respond with valid JSON."},
             {"role": "user", "content": prompt},
         ],
@@ -137,7 +136,7 @@ Document text:
         temperature=0,
         response_format={"type": "json_object"},
     )
-    return json.loads(response.choices[0].message.content.strip())
+    return json.loads(response.choices[0].message.content.strip()) 
 
 
 
@@ -260,11 +259,11 @@ Document text:
         doc_type["value"] = "other"
 
     if doc_type["value"] == "other":
-        return rejected(doc_type, elapsed)
+        return rejected(doc_type, elapsed) #Build 'other' rejection for single call
 
     return {"metadata": metadata, "elapsed_seconds": round(elapsed, 3)}
 
-if __name__ == "__main__":
+if __name__ == "__main__": #Built to test out the functions during development
     SAMPLE_PDF = DATA_DIR / "4 - First Notice of Loss – Water Escape at Sunbeam Apartments.pdf"
 
     if not SAMPLE_PDF.exists():

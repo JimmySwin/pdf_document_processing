@@ -5,7 +5,7 @@ from pathlib import Path
 
 '''Database Schema setup'''
 
-_DDL = """
+DDL = """
 CREATE TABLE IF NOT EXISTS documents (
     id                 INTEGER PRIMARY KEY AUTOINCREMENT,
     request_id         TEXT    NOT NULL,
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS extracted_fields (
 def init_db(db_path):
     """Create tables if they don't already exist."""
     with sqlite3.connect(db_path) as conn:
-        conn.executescript(_DDL)
+        conn.executescript(DDL)
 
 
 def save_result(db_path, filename: str, request_id: str, extraction_method: str, result: dict) -> int:
@@ -59,12 +59,12 @@ def save_result(db_path, filename: str, request_id: str, extraction_method: str,
                 result.get("message") if rejected else None,
             ),
         )
-        document_id = cur.lastrowid
+        document_id = cur.lastrowid # Auto generates a unique document ID for each processed document, and adds it to the other table
 
         if not rejected:
             rows = []
             for field_name, field_data in result.get("metadata", {}).items():
-                changed = field_data.get("changed")  # None for non-seeded fields
+                changed = field_data.get("changed")  # None for fields not extracted by regex
                 rows.append((
                     document_id,
                     field_name,
@@ -110,4 +110,4 @@ def get_document_history(db_path, filename: str) -> list[dict]:
 
 def generate_request_id() -> str:
     """Creates the unique request ID for the audit trail, using UUID4 for randomness."""
-    return str(uuid.uuid4())
+    return str(uuid.uuid4())# Could generate the same twice but so uncommon its basicaly 0 chance
