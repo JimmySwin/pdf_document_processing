@@ -74,7 +74,7 @@ Document text:
             {"role": "user", "content": prompt},
         ],
         max_tokens=300,
-        temperature=0.1, # low temperature for more deterministic output
+        temperature=0, # low temperature for more deterministic output
         response_format={"type": "json_object"},
     )
     result = json.loads(response.choices[0].message.content.strip()) # Returns the first index as the API returns a list
@@ -134,7 +134,7 @@ Document text:
             {"role": "user", "content": prompt},
         ],
         max_tokens=300, # low token limit as we expect short answers for each field, and this keeps costs down
-        temperature=0.1,
+        temperature=0,
         response_format={"type": "json_object"},
     )
     return json.loads(response.choices[0].message.content.strip())
@@ -246,7 +246,7 @@ Document text:
             {"role": "user", "content": prompt},
         ],
         max_tokens=900,
-        temperature=0.1,
+        temperature=0,
         response_format={"type": "json_object"},
     )
 
